@@ -1,9 +1,9 @@
 """
 Simple scrapli script to connect to multiple hosts
-This example uses connection manager to manage,
-opening and closing the connection
+to pull out the hostname, serial number details using texfm
+structured data.
 """
-
+import json
 from scrapli.driver.core import IOSXEDriver #importing IOSXEDriver from scrapli
 
 devices = [
@@ -33,6 +33,9 @@ devices = [
 
 for device in devices:
     with IOSXEDriver(**device) as conn: #using a for loop with content manager to connect to the hosts
-        response = conn.send_command("Show IP interface brief") #creating the object response and using send_command to send command to hosts
-    
-print(response.result) #printing the response results to screen
+        response = conn.send_command("show version") #creating the object response and using send_command to send command to hosts
+        struct_result = response.textfsm_parse_output() #creating an object called struct_result and using texfsm to parse the output into structured data
+        for info in struct_result: #creating an object called info to capture output of struct_result
+            
+            print(f"Device {info['hostname']} has a serial number of {info['serial'][0]}") 
+            #using the output from info to pull out the device hostname / serial numbers. Note [0] removes the [' from the output of serial
